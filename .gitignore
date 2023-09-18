@@ -1,0 +1,10 @@
+node_modules/
+dist/
+npm-debug.log
+# next.js
+.next
+# env vars
+.env
+.env.build
+# macOS
+.DS_Store
