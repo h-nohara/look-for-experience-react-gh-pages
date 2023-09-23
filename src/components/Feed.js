@@ -65,9 +65,9 @@ const Feed = () => {
         if (!touchStart || !touchEnd) { return; }
         const distance = touchStart - touchEnd;
         if (Math.abs(distance) >= minSwipeDistance) {
-            const flag = distance > 0 ? 1 : -1;
+            const flag = distance > 0 ? 1 : -1;  // 1 if go to next item, -1 if go to previous item
             const nextIndex = feedItemIndex + flag;
-            if ((flag == -1 && feedItemIndex == 0) || (flag == 1 && document.getElementById(`feed-item-${feedItemIndex + flag}`) == undefined)) {
+            if ((flag == -1 && feedItemIndex == 0) || (flag == 1 && document.getElementById(`feed-item-${nextIndex}`) == undefined)) {
                 // If the current item is first one or last one, do nothing.
                 return;
             }
