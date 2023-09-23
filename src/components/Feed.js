@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CardMedia } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './Feed.css'
@@ -47,35 +47,54 @@ const Feed = () => {
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
 
-    // the required distance between touchStart and touchEnd to be detected as a swipe
-    const minSwipeDistance = 50;
-
     const onTouchStart = (e) => {
         setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
         setTouchStart(e.targetTouches[0].clientY);
     }
 
-    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientY);
+    const onTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientY);
+        e.preventDefault();  // prevent scrolling by user
+    }
 
-    const onTouchEnd = () => {
+    const [feedItemIndex, setFeedItemIndex] = useState(0);
+    const feedElement = useRef();
+    const minSwipeDistance = 50;
+
+    const onTouchEnd = (e) => {
         if (!touchStart || !touchEnd) { return; }
         const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-        if (isLeftSwipe || isRightSwipe) {
-            console.log('swipe', isLeftSwipe ? 'up' : 'down');
+        if (Math.abs(distance) >= minSwipeDistance) {
+            const flag = distance > 0 ? 1 : -1;
+            const nextIndex = feedItemIndex + flag;
+            if ((flag == -1 && feedItemIndex == 0) || (flag == 1 && document.getElementById(`feed-item-${feedItemIndex + flag}`) == undefined)) {
+                // If the current item is first one or last one, do nothing.
+                return;
+            }
+            document.getElementById(`feed-item-${nextIndex}`).scrollIntoView();
+            document.getElementById(`feed-item-${feedItemIndex}`).pause();
+            document.getElementById(`feed-item-${nextIndex}`).play();
+            // feedElement.current.scrollBy(0, isLeftSwipe ? 300 : -300);
+            setFeedItemIndex(nextIndex);
         }
-        // add your conditional logic here
     }
+
+    useEffect(() => {
+        feedElement.current.addEventListener('touchmove', (e) => {
+            onTouchMove(e);
+        }, { passive: false });  // `passive` should be false for using `e.preventDefault()` in this event.
+    }, []);
 
     return (
         <div id="feed"
-            onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
             style={{
                 overflowY: "scroll",
                 scrollBehavior: "smooth",
                 scrollSnapType: "y mandatory",
             }}
+            ref={feedElement}
         >
             < InfiniteScroll
                 dataLength={items.length} //This is important field to render the next data
@@ -106,6 +125,8 @@ const Feed = () => {
                                 image={`/public/video/${url}`}
                                 autoPlay
                                 controls
+                                muted
+                                id={`feed-item-${ind}`}
                                 key={ind}
                                 style={{
                                     scrollSnapAlign: "end",
