@@ -44,38 +44,38 @@ const Feed = () => {
     }
 
 
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
+    const touchStart = useRef(null);
+    const touchEnd = useRef(null);
 
     const onTouchStart = (e) => {
-        setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
-        setTouchStart(e.targetTouches[0].clientY);
+        touchEnd.current = null; // otherwise the swipe is fired even with usual touch events
+        touchStart.current = e.targetTouches[0].clientY;
     }
 
     const onTouchMove = (e) => {
-        setTouchEnd(e.targetTouches[0].clientY);
+        touchEnd.current = e.targetTouches[0].clientY;
         e.preventDefault();  // prevent scrolling by user
     }
 
-    const [feedItemIndex, setFeedItemIndex] = useState(0);
+    const feedItemIndex = useRef(0);
     const feedElement = useRef();
     const minSwipeDistance = 50;
 
     const onTouchEnd = (e) => {
-        if (!touchStart || !touchEnd) { return; }
-        const distance = touchStart - touchEnd;
+        if (!touchStart.current || !touchEnd.current) { return; }
+        const distance = touchStart.current - touchEnd.current;
         if (Math.abs(distance) >= minSwipeDistance) {
             const flag = distance > 0 ? 1 : -1;  // 1 if go to next item, -1 if go to previous item
-            const nextIndex = feedItemIndex + flag;
-            if ((flag == -1 && feedItemIndex == 0) || (flag == 1 && document.getElementById(`feed-item-${nextIndex}`) == undefined)) {
+            const nextIndex = feedItemIndex.current + flag;
+            if ((flag == -1 && feedItemIndex.current == 0) || (flag == 1 && document.getElementById(`feed-item-${nextIndex}`) == undefined)) {
                 // If the current item is first one or last one, do nothing.
                 return;
             }
             document.getElementById(`feed-item-${nextIndex}`).scrollIntoView();
-            document.getElementById(`feed-item-${feedItemIndex}`).pause();
+            document.getElementById(`feed-item-${feedItemIndex.current}`).pause();
             document.getElementById(`feed-item-${nextIndex}`).play();
             // feedElement.current.scrollBy(0, isLeftSwipe ? 300 : -300);
-            setFeedItemIndex(nextIndex);
+            feedItemIndex.current = nextIndex;
         }
     }
 
