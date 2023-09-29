@@ -1,8 +1,10 @@
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { CardMedia } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
+
 import './Feed.css'
+import { AppContext } from "../App";
 
 
 const imageList = ['asset1.jpg'];
@@ -26,6 +28,12 @@ const endMessage = (
 const loadingMessage = (< h4 > Loading...</h4 >);
 
 const Feed = () => {
+    const context = useContext(AppContext);
+    useEffect(() => {
+        console.log("start updating feed contents");
+        console.log(context.feedFilter);
+    }, [context.feedFilter]);
+
     const defaultList = [
         'ehime-matsuyama-exp-hotspring.mp4',
         'tokyo--exp-cristmas.mp4',

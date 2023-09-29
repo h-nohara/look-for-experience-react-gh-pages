@@ -1,13 +1,14 @@
 import React from 'react';
-import { useState } from "react";
+import { useState, useContext } from "react";
 import TuneIcon from '@mui/icons-material/Tune';
-
-import './TopNavBar.css'
 import {
     Grid, IconButton, Button, Box,
     OutlinedInput, InputLabel, MenuItem, FormControl, Select, Chip
 } from '@mui/material';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
+
+import './TopNavBar.css';
+import { AppContext } from "../App";
 
 
 // const MenuProps = {
@@ -25,10 +26,10 @@ const costList = [
     "3000円以上"
 ];
 
-const durationList = [
-    "１時間以内",
-    "１時間〜３時間",
-    "３時間以上"
+const categoryList = [
+    "飲食",
+    "遊び",
+    "休憩"
 ];
 
 const distanceList = [
@@ -53,52 +54,62 @@ const TopNavBar = () => {
         setIsDrawerOpened(open);
     };
 
-    function applyFilter() {
-        console.log(cost, duration, distance);
-        toggleDrawer(false)();
-    }
-
     // 絞り込みフォーム
 
-    const [cost, setCost] = useState([]);
-    const [duration, setDuration] = useState([]);
-    const [distance, setDistance] = useState([]);
-    const categoryFuncMap = {
-        "cost": setCost,
-        "duration": setDuration,
-        "distance": setDistance,
-    }
+    const context = useContext(AppContext);
 
-    const handleSelected = (category) => (event) => {
-        const {
-            target: { value },
-        } = event;
-        const f = categoryFuncMap[category];
-        f(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
-    };
+    const [cost, setCost] = useState([]);
+    const [category, setCategory] = useState([]);
+    const [distance, setDistance] = useState([]);
 
     const categoryConfig = [
         {
             key: "cost",
             label: "料金",
-            itemList: cost,
+            selectedItemList: cost,
+            updateFunc: setCost,
             allItemList: costList,
         },
         {
-            key: "duration",
-            label: "所要時間",
-            itemList: duration,
-            allItemList: durationList,
+            key: "category",
+            label: "カテゴリー",
+            selectedItemList: category,
+            updateFunc: setCategory,
+            allItemList: categoryList,
         }, {
             key: "distance",
             label: "近さ",
-            itemList: distance,
+            selectedItemList: distance,
+            updateFunc: setDistance,
             allItemList: distanceList,
         },
     ];
+
+    const handleSelected = (key) => (event) => {
+        const {
+            target: { value },
+        } = event;
+        // On autofill we get a stringified value.
+        const newVal = typeof value === 'string' ? value.split(',') : value;
+        let conf = null;
+        for (let c of categoryConfig) {
+            if (key == c.key) {
+                conf = c;
+                break;
+            }
+        }
+        conf.updateFunc(newVal);
+    };
+
+    function applyFilter() {
+        console.log(cost, category, distance);
+        context.setFeedFilter({
+            "cost": cost,
+            "category": category,
+            "distance": distance,
+        });
+        toggleDrawer(false)();
+    }
 
     return (
         <div id="topNavContainer">
@@ -138,15 +149,13 @@ const TopNavBar = () => {
                                     sx={{ m: 1, width: 300 }}
                                     key={conf.key}
                                 >
-                                    <InputLabel id="cost-filter-label">{conf.label}</InputLabel>
+                                    <InputLabel>{conf.label}</InputLabel>
                                     <Select
-                                        labelId="cost-filter-label"
                                         multiple
-                                        value={conf.itemList}
+                                        value={conf.selectedItemList}
                                         onChange={handleSelected(conf.key)}
                                         input={
                                             <OutlinedInput
-                                                // id="select-multiple-chip"
                                                 label={conf.label} />
                                         }
                                         renderValue={(selected) => (
