@@ -5,20 +5,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import './Feed.css'
 import { AppContext } from "../App";
+import { allVideoList, filterItems } from "./feedFilter"
 
-
-const imageList = ['asset1.jpg'];
-const allVideoList = [
-    'ehime-matsuyama-exp-hotspring.mp4',
-    'tokyo--exp-cristmas.mp4',
-    'tokyo-shibuya-exp-perfume.mp4',
-    'tokyo-shibuya-food-marshumallow.mp4',
-
-    'ehime-matsuyama-exp-hotspring.mp4',
-    'tokyo--exp-cristmas.mp4',
-    'tokyo-shibuya-exp-perfume.mp4',
-    'tokyo-shibuya-food-marshumallow.mp4',
-];
 
 const endMessage = (
     < p style={{ textAlign: 'center' }}>
@@ -30,22 +18,24 @@ const loadingMessage = (< h4 > Loading...</h4 >);
 const Feed = () => {
     const context = useContext(AppContext);
     useEffect(() => {
-        console.log("start updating feed contents");
-        console.log(context.feedFilter);
+        const filteredItems = filterItems(context.feedFilter);
+        setItems(filteredItems);
+        feedItemIndex.current = 0;
+        feedElement.current.scrollTo(0, 0);
+        potentialFilteredItems.current = filterItems(context.feedFilter);
     }, [context.feedFilter]);
 
-    const defaultList = [
-        'ehime-matsuyama-exp-hotspring.mp4',
-        'tokyo--exp-cristmas.mp4',
-    ];
-    const [items, setItems] = useState(defaultList);
+    // const [items, setItems] = useState(allVideoList.slice(0, 2));
+    const potentialFilteredItems = useRef(allVideoList);
+    const [items, setItems] = useState(potentialFilteredItems.current.slice(0, 2));
+
     function checkHasMore() {
-        return items.length < allVideoList.length;
+        return items.length < potentialFilteredItems.current.length;
     }
     const batch = 2;
     function fetchItems() {
         const n = items.length;
-        const newItems = allVideoList.slice(n, n + batch);
+        const newItems = potentialFilteredItems.current.slice(n, n + batch);
         setItems([...items, ...newItems]);
     }
     function onScroll(e) {
@@ -126,11 +116,11 @@ const Feed = () => {
             // }
             >
                 {
-                    items.map(function (url, ind) {
+                    items.map(function (contentInfo, ind) {
                         return (
                             < CardMedia
                                 component='video'
-                                image={`/public/video/${url}`}
+                                image={`/public/video/${contentInfo.src}`}
                                 autoPlay
                                 controls
                                 muted

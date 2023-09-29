@@ -4,10 +4,11 @@ import './App.css'
 import TopNavBar from './components/TopNavBar';
 import BottomNavBar from './components/BottomNavBar';
 import Feed from './components/Feed';
+import { defaultFeedFilter } from "./components/feedFilter";
 
 
 export const AppContext = React.createContext({
-  feedFilter: {},
+  feedFilter: defaultFeedFilter,
   setFeedFilter: (newVal) => { },
 });
 

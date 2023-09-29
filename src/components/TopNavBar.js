@@ -9,7 +9,7 @@ import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 
 import './TopNavBar.css';
 import { AppContext } from "../App";
-
+import { costChoiceList, categoryChoiceList, distanceChoiceList } from "./feedFilter";
 
 // const MenuProps = {
 //     PaperProps: {
@@ -20,23 +20,15 @@ import { AppContext } from "../App";
 //     },
 // };
 
-const costList = [
-    "1000円以内",
-    "1000円〜3000円",
-    "3000円以上"
-];
+function getChoiceDisplayNameFromKey(key, selectionInfo) {
+    for (let c of selectionInfo.choiceList) {
+        if (c.key == key) {
+            return c.displayName;
+        }
+    }
+    return "not found name";
+}
 
-const categoryList = [
-    "飲食",
-    "遊び",
-    "休憩"
-];
-
-const distanceList = [
-    "近所",
-    "そんなに遠くない",
-    "旅行"
-];
 
 const TopNavBar = () => {
     // 絞り込みモーダル
@@ -62,27 +54,28 @@ const TopNavBar = () => {
     const [category, setCategory] = useState([]);
     const [distance, setDistance] = useState([]);
 
-    const categoryConfig = [
+    const selectionConfig = [
         {
             key: "cost",
             label: "料金",
             selectedItemList: cost,
             updateFunc: setCost,
-            allItemList: costList,
+            choiceList: costChoiceList,
         },
         {
             key: "category",
             label: "カテゴリー",
             selectedItemList: category,
             updateFunc: setCategory,
-            allItemList: categoryList,
-        }, {
+            choiceList: categoryChoiceList,
+        },
+        {
             key: "distance",
             label: "近さ",
             selectedItemList: distance,
             updateFunc: setDistance,
-            allItemList: distanceList,
-        },
+            choiceList: distanceChoiceList,
+        }
     ];
 
     const handleSelected = (key) => (event) => {
@@ -92,7 +85,7 @@ const TopNavBar = () => {
         // On autofill we get a stringified value.
         const newVal = typeof value === 'string' ? value.split(',') : value;
         let conf = null;
-        for (let c of categoryConfig) {
+        for (let c of selectionConfig) {
             if (key == c.key) {
                 conf = c;
                 break;
@@ -143,7 +136,7 @@ const TopNavBar = () => {
                 <Box textAlign='center'>
                     <h2>絞り込み</h2>
                     {
-                        categoryConfig.map(function (conf) {
+                        selectionConfig.map(function (conf) {
                             return (
                                 <FormControl
                                     sx={{ m: 1, width: 300 }}
@@ -161,18 +154,18 @@ const TopNavBar = () => {
                                         renderValue={(selected) => (
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                 {selected.map((value) => (
-                                                    <Chip key={value} label={value} />
+                                                    <Chip key={value} label={getChoiceDisplayNameFromKey(value, conf)} />
                                                 ))}
                                             </Box>
                                         )}
                                     >
-                                        {conf.allItemList.map((v) => (
+                                        {conf.choiceList.map((selectionInfo) => (
                                             <MenuItem
-                                                key={v}
-                                                value={v}
+                                                key={`${conf.key}-${selectionInfo.key}`}
+                                                value={selectionInfo.key}
                                             // style={getStyles(v, cost, theme)}
                                             >
-                                                {v}
+                                                {selectionInfo.displayName}
                                             </MenuItem>
                                         ))}
                                     </Select>
