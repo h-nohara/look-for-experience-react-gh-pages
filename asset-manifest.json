@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/look-for-experience-react-gh-pages/static/css/main.c11917a5.css",
+    "main.js": "/look-for-experience-react-gh-pages/static/js/main.8caf0450.js",
+    "index.html": "/look-for-experience-react-gh-pages/index.html",
+    "main.c11917a5.css.map": "/look-for-experience-react-gh-pages/static/css/main.c11917a5.css.map",
+    "main.8caf0450.js.map": "/look-for-experience-react-gh-pages/static/js/main.8caf0450.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c11917a5.css",
+    "static/js/main.8caf0450.js"
+  ]
+}
